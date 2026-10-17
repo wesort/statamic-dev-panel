@@ -122,10 +122,12 @@ For example, in `config/statamic/git.php`:
 
 ```php
 'repo_url' => env('GIT_REPO_URL', null),
-'commit_hash' => exec('git rev-parse --short HEAD'),
-'commit_datetime' => exec('git log -1 --format=%cd --date=format:"%d %b %Y %H:%M"'),
-'commit_message' => exec('git log -1 --format=%s'),
+'commit_hash' => exec('git -C '.escapeshellarg(base_path()).' rev-parse --short HEAD'),
+'commit_datetime' => exec('git -C '.escapeshellarg(base_path()).' log -1 --format=%cd --date=format:"%d %b %Y %H:%M"'),
+'commit_message' => exec('git -C '.escapeshellarg(base_path()).' log -1 --format=%s'),
 ```
+
+`git -C base_path()` matters: without it, git runs in whatever directory the command was started from, so a `config:cache` run from outside the site caches an empty hash.
 
 These run whenever config loads without a config cache, so cache config in production (`php artisan config:cache` or `optimize`).
 
