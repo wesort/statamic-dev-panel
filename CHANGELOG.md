@@ -1,5 +1,15 @@
 # Release Notes
 
+## 1.1.0 (2026-10-17)
+
+### What's new
+- `{{ dev_panel:raw_data }} ... {{ /dev_panel:raw_data }}` tag pair for content shown only while the raw-data toggle is on, with no Alpine syntax in templates. `as` picks the element, and any other parameter becomes an attribute.
+
+### What's improved
+- Raw data in the tag stays hidden without an `[x-cloak]` CSS rule and before Alpine starts, as it's hidden with an inline style
+- The tag doesn't need an `x-data` ancestor, and renders nothing when `features.raw_data` is off
+- `dev-panel:status` and `dev-panel:install` now point to the tag, and count it as raw-data use. `$store.devPanel?.rawData` keeps working.
+
 ## 1.0.0 (2026-10-17)
 
 ### What's new
