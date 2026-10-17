@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.1.1 (2026-10-17)
+
+### What's improved
+- `dev-panel:status` also checks the site's own scripts under `resources/js` (not `node_modules`) for the old dev panel Alpine keys, `showRawData`, `showDesignGrids` and `minimiseDevPanel`, so removing them from `<body x-data>` can't break a script that still reads them
+
 ## 1.1.0 (2026-10-17)
 
 ### What's new
