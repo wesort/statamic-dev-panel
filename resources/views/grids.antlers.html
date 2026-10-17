@@ -1,0 +1,13 @@
+{{ store_script }}
+<div
+    x-data
+    x-cloak
+    x-show="$store.devPanel.grids"
+    class="pointer-events-none fixed z-20 w-full min-h-screen text-center font-mono text-gray-500"
+>
+    <div {{ if grid_container_class }}class="{{ grid_container_class }}"{{ else }}style="display: grid; grid-template-columns: repeat({{ grid_columns }}, minmax(0, 1fr));"{{ /if }}>
+        {{ loop from="1" :to="grid_columns" }}
+            <div class="border-x-2 border-yellow-500 bg-yellow-500/20 min-h-screen">{{ value }}</div>
+        {{ /loop }}
+    </div>
+</div>

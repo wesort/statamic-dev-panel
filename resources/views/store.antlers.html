@@ -1,0 +1,14 @@
+<script>
+    document.addEventListener('alpine:init', () => {
+        if (Alpine.store('devPanel')) return;
+
+        const remember = (value, key) => Alpine.$persist ? Alpine.$persist(value).as('devPanel_' + key) : value;
+
+        Alpine.store('devPanel', {
+            minimised: remember({{ if start_minimised }}true{{ else }}false{{ /if }}, 'minimised'),
+            grids: remember(false, 'grids'),
+            rawData: remember(false, 'rawData'),
+        });
+    });
+</script>
+<style>[x-cloak] { display: none !important; }</style>

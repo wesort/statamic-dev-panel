@@ -1,0 +1,60 @@
+{
+    "name": "wesort/statamic-dev-panel",
+    "description": "A Statamic addon that adds a small developer panel to the front end for logged-in users: commit, breakpoints, design grids, raw-data toggle, edit link and more.",
+    "type": "statamic-addon",
+    "license": "MIT",
+    "keywords": [
+        "statamic",
+        "addon",
+        "developer",
+        "debug",
+        "design-grid",
+        "breakpoints"
+    ],
+    "authors": [
+        {
+            "name": "We Sort",
+            "homepage": "https://wesort.co.uk"
+        }
+    ],
+    "homepage": "https://github.com/wesort/statamic-dev-panel",
+    "support": {
+        "issues": "https://github.com/wesort/statamic-dev-panel/issues",
+        "source": "https://github.com/wesort/statamic-dev-panel"
+    },
+    "autoload": {
+        "psr-4": {
+            "WeSort\\DevPanel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WeSort\\DevPanel\\Tests\\": "tests"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "statamic/cms": "^5.0 || ^6.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0 || ^10.0 || ^11.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Dev Panel",
+            "description": "A small developer panel on the front end for logged-in users."
+        },
+        "laravel": {
+            "providers": [
+                "WeSort\\DevPanel\\ServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

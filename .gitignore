@@ -1,0 +1,9 @@
+node_modules
+vendor
+composer.lock
+.phpunit.result.cache
+.phpunit.cache
+.DS_Store
+.idea
+.vscode
+/tests/__fixtures__

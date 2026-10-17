@@ -1,0 +1,133 @@
+{{ store_script }}
+<div
+    x-data
+    class="group fixed z-30 bottom-4 right-4 p-4 rounded-lg print:hidden
+    text-gray-500 hover:text-white bg-black/10 hover:bg-black/80 transition-colors"
+>
+    {{ if commit || access }}
+        <div x-cloak x-show="! $store.devPanel.minimised">
+            {{ if commit }}
+                {{ if commit:url }}
+                    <a
+                        class="block mb-2 font-mono text-xs leading-none text-current group-hover:text-white no-underline"
+                        href="{{ commit:url }}"
+                        title="{{ commit:datetime | entities }}&#013;{{ commit:message | entities }}"
+                    >{{ commit:hash }}</a>
+                {{ else }}
+                    <div
+                        class="mb-2 font-mono text-xs leading-none"
+                        title="{{ commit:datetime | entities }}&#013;{{ commit:message | entities }}"
+                    >{{ commit:hash }}</div>
+                {{ /if }}
+            {{ /if }}
+            {{ if access }}
+                <div class="mb-2 font-mono text-xs leading-none">Access: {{ access }}</div>
+            {{ /if }}
+        </div>
+    {{ /if }}
+
+    <div class="flex justify-between items-center gap-6">
+        <div x-cloak x-show="! $store.devPanel.minimised" class="flex items-center justify-end gap-6">
+
+            {{ if features:breakpoints }}
+                <div
+                    x-data="{
+                        breakpoints: {{ breakpoints_json | entities }},
+                        name: '_',
+                        width: 0,
+                        height: 0,
+                        update() {
+                            this.width = window.innerWidth;
+                            this.height = window.innerHeight;
+                            this.name = Object.keys(this.breakpoints)
+                                .filter((key) => window.matchMedia('(min-width: ' + this.breakpoints[key] + 'px)').matches)
+                                .pop() || '_';
+                        }
+                    }"
+                    x-init="update()"
+                    @resize.window="update()"
+                >
+                    <div class="flex gap-2 items-center text-base">
+                        <span class="w-6 h-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6zM7.5 6h.008v.008H7.5V6zm2.25 0h.008v.008H9.75V6z" />
+                            </svg>
+                        </span>
+                        <span x-text="name === '_' ? '_' : name + ':'">_</span>
+                    </div>
+                    <div class="text-xs text-center leading-none">
+                        <span x-text="width"></span> &times; <span x-text="height"></span>
+                    </div>
+                </div>
+            {{ /if }}
+
+            {{ toggles }}
+                <button
+                    type="button"
+                    role="switch"
+                    aria-label="{{ label }}"
+                    title="{{ label }}"
+                    :aria-checked="$store.devPanel.{{ store_key }}.toString()"
+                    @click="$store.devPanel.{{ store_key }} = ! $store.devPanel.{{ store_key }}"
+                    :class="$store.devPanel.{{ store_key }} ? 'text-green-600' : ''"
+                    class="relative w-6 h-6 cursor-pointer hover:opacity-50"
+                >
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" style="fill: none;" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}" />
+                    </svg>
+                </button>
+            {{ /toggles }}
+
+            {{ if edit_url }}
+                <a
+                    href="{{ edit_url }}"
+                    target="_blank"
+                    title="Edit this entry"
+                    class="block w-6 h-6 text-current hover:opacity-50"
+                >
+                    <span class="sr-only">Edit this entry</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="fill-transparent" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                </a>
+            {{ /if }}
+
+            {{ if features:back_to_top }}
+                <button
+                    type="button"
+                    onclick="window.scroll(0, 0)"
+                    title="Scroll to top"
+                    class="w-6 h-6 cursor-pointer hover:opacity-50"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                    </svg>
+                    <span class="sr-only">Scroll to top</span>
+                </button>
+            {{ /if }}
+
+        </div>
+
+        <button
+            type="button"
+            @click="$store.devPanel.minimised = ! $store.devPanel.minimised"
+            :aria-expanded="(! $store.devPanel.minimised).toString()"
+            class="cursor-pointer"
+        >
+            <span x-show="$store.devPanel.minimised" class="block w-6 h-6">
+                <span class="sr-only">Expand dev panel</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                </svg>
+            </span>
+            <span x-cloak x-show="! $store.devPanel.minimised" class="block w-6 h-6">
+                <span class="sr-only">Minimise dev panel</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25" />
+                </svg>
+            </span>
+        </button>
+
+        {{ extra }}
+    </div>
+</div>
