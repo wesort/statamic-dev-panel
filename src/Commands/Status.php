@@ -226,11 +226,11 @@ class Status extends Command
         }
 
         if ($features['raw_data'] ?? false) {
-            $uses = $site->findInViews('/\$store\.devPanel\??\.rawData/');
+            $uses = $site->findInViews('/\{\{\s*dev_panel:raw_data\b|\$store\.devPanel\??\.rawData/');
 
             $uses
-                ? $this->add('ok', 'Raw data', count($uses).' '.(count($uses) === 1 ? 'template uses' : 'places use').' $store.devPanel?.rawData')
-                : $this->add('info', 'Raw data', 'the toggle is on, but no template uses it', ['Use x-show="$store.devPanel?.rawData", or set features.raw_data to false']);
+                ? $this->add('ok', 'Raw data', 'used in '.count($uses).' '.(count($uses) === 1 ? 'place' : 'places'))
+                : $this->add('info', 'Raw data', 'the toggle is on, but no template uses it', ['Wrap detail in {{ dev_panel:raw_data }} ... {{ /dev_panel:raw_data }}, or set features.raw_data to false']);
         }
     }
 
@@ -242,7 +242,7 @@ class Status extends Command
             $this->add('warn', 'Old Alpine keys', 'found in '.count($keys).' '.(count($keys) === 1 ? 'place' : 'places'), array_merge(
                 array_slice($keys, 0, 8),
                 count($keys) > 8 ? ['...and '.(count($keys) - 8).' more'] : [],
-                ['Use $store.devPanel?.rawData for raw data, and remove the dev keys from x-data']
+                ['Wrap raw data in {{ dev_panel:raw_data }} ... {{ /dev_panel:raw_data }}, and remove the dev keys from x-data']
             ));
         }
 

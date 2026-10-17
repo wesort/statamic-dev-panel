@@ -113,6 +113,6 @@ class Install extends Command
         $hasPanel || $this->line('        {{ dev_panel }}');
         $this->line('    </body>');
         $this->output->newLine();
-        $this->line('Show extra detail to logged-in users with x-show="$store.devPanel?.rawData".');
+        $this->line('Show extra detail while the raw-data toggle is on with {{ dev_panel:raw_data }} ... {{ /dev_panel:raw_data }}.');
     }
 }

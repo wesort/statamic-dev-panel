@@ -169,4 +169,46 @@ class DevPanelTest extends TestCase
 
         $this->assertStringContainsString('{&quot;xs&quot;:400,&quot;md&quot;:768,&quot;lg&quot;:1024}', $html);
     }
+
+    #[Test]
+    public function raw_data_wraps_its_content_hidden_until_the_toggle_is_on()
+    {
+        $html = $this->render('{{ dev_panel:raw_data }}{{ title }}{{ /dev_panel:raw_data }}', ['title' => 'Hello']);
+
+        $this->assertSame('<div x-data x-show="$store.devPanel?.rawData" style="display: none">Hello</div>', $html);
+    }
+
+    #[Test]
+    public function raw_data_takes_an_element_and_attributes()
+    {
+        $html = $this->render('{{ dev_panel:raw_data as="span" class="text-red-700" aria-hidden="true" title="a \\"quote\\"" }}*{{ /dev_panel:raw_data }}');
+
+        $this->assertSame('<span x-data x-show="$store.devPanel?.rawData" style="display: none" class="text-red-700" aria-hidden="true" title="a &quot;quote&quot;">*</span>', $html);
+    }
+
+    #[Test]
+    public function raw_data_ignores_attributes_it_relies_on_and_unsafe_element_names()
+    {
+        $html = $this->render('{{ dev_panel:raw_data as="div onclick" style="color: red" x-show="true" }}x{{ /dev_panel:raw_data }}');
+
+        $this->assertSame('<div x-data x-show="$store.devPanel?.rawData" style="display: none">x</div>', $html);
+    }
+
+    #[Test]
+    public function raw_data_renders_nothing_when_the_feature_is_off()
+    {
+        config(['statamic-dev-panel.features.raw_data' => false]);
+
+        $this->assertSame('', $this->render('{{ dev_panel:raw_data }}secret{{ /dev_panel:raw_data }}'));
+    }
+
+    #[Test]
+    public function raw_data_works_inside_loops()
+    {
+        $html = $this->render('{{ items }}{{ dev_panel:raw_data as="span" }}{{ name }}{{ /dev_panel:raw_data }}{{ /items }}', ['items' => [['name' => 'a'], ['name' => 'b']]]);
+
+        $this->assertSame(2, substr_count($html, '<span x-data'));
+        $this->assertStringContainsString('>a</span>', $html);
+        $this->assertStringContainsString('>b</span>', $html);
+    }
 }

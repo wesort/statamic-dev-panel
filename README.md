@@ -104,13 +104,26 @@ Both render nothing for visitors, apart from a `<!-- Start ... -->` and `<!-- En
 
 ### Raw data
 
-The raw-data toggle sets `$store.devPanel.rawData`. Use it in your templates to show extra detail to logged-in users. Use optional chaining, as the store only exists for logged-in users:
+Wrap anything that should only show while the raw-data toggle is on:
 
 ```antlers
-<div x-cloak x-show="$store.devPanel?.rawData">
+{{ dev_panel:raw_data }}
     {{ last_modified format="Y-m-d" }}
-</div>
+{{ /dev_panel:raw_data }}
 ```
+
+This outputs a `<div>` that starts hidden and shows when the toggle is on. Use `as` to pick the element, and any other parameter becomes an attribute:
+
+```antlers
+{{ dev_panel:raw_data as="span" class="text-sm text-red-700" aria-hidden="true" }}*{{ /dev_panel:raw_data }}
+```
+
+- It works inside loops and partials, and doesn't need an `x-data` ancestor.
+- It is hidden with an inline style, so it stays hidden without any CSS and before Alpine starts.
+- It is hidden, not secret: the content is in the page source for every visitor. Don't put anything private in it.
+- With `features.raw_data` off, it renders nothing at all.
+
+In Alpine expressions, the toggle is `$store.devPanel?.rawData` (the store only exists for logged-in users).
 
 ## Configuration
 

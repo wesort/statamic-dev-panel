@@ -33,6 +33,39 @@ class DevPanel extends Tags
     }
 
     /**
+     * {{ dev_panel:raw_data }} ... {{ /dev_panel:raw_data }}: content shown only
+     * while the panel's raw-data toggle is on.
+     *
+     * Hidden with an inline style rather than x-cloak, so it stays hidden
+     * without any CSS or before Alpine starts. It is hidden, not secret: the
+     * content is in the page for everyone. Renders nothing when the raw_data
+     * feature is off.
+     *
+     * Parameters: `as` sets the element (default div). Any others, such as
+     * class or aria-hidden, become attributes on it.
+     */
+    public function rawData()
+    {
+        if (! config('statamic-dev-panel.enabled') || ! config('statamic-dev-panel.features.raw_data')) {
+            return '';
+        }
+
+        $element = strtolower((string) $this->params->get('as', 'div'));
+        $element = preg_match('/^[a-z][a-z0-9-]*$/', $element) ? $element : 'div';
+
+        $attributes = collect($this->params->except(['as'])->all())
+            ->reject(fn ($value, $name) => ! preg_match('/^[a-zA-Z_:][a-zA-Z0-9_:.-]*$/', $name) || in_array(strtolower($name), ['style', 'x-data', 'x-show']))
+            // Statamic casts "true" and "false" to booleans: write them back as
+            // strings, as attributes like aria-hidden need the value
+            ->map(fn ($value, $name) => ' '.$name.'="'.e(is_bool($value) ? ($value ? 'true' : 'false') : (string) $value).'"')
+            ->implode('');
+
+        return "<{$element} x-data x-show=\"\$store.devPanel?.rawData\" style=\"display: none\"{$attributes}>"
+            .$this->parse()
+            ."</{$element}>";
+    }
+
+    /**
      * Renders a view from inside a nocache region, at request time.
      * Used by index() and grids() rather than in templates.
      */
