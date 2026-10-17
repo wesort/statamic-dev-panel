@@ -238,4 +238,19 @@ class CommandsTest extends TestCase
 
         Http::assertNothingSent();
     }
+
+    #[Test]
+    public function status_finds_old_alpine_keys_in_the_sites_scripts_but_not_node_modules()
+    {
+        $this->writeFile('resources/js/site.js', "import Alpine from 'alpinejs'\nAlpine.store('ui', { showRawData: false })\n");
+        $this->writeFile('resources/js/components/Thing.vue', "<template><div v-if=\"minimiseDevPanel\" /></template>\n");
+        $this->writeFile('resources/js/notes.txt', 'showDesignGrids');
+        $this->writeFile('node_modules/some-package/index.js', 'showRawData');
+
+        $this->artisan('statamic:dev-panel:status')
+            ->expectsOutputToContain('resources/js/site.js:2')
+            ->expectsOutputToContain('resources/js/components/Thing.vue:1')
+            ->doesntExpectOutputToContain('notes.txt')
+            ->doesntExpectOutputToContain('node_modules');
+    }
 }

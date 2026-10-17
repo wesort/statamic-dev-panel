@@ -236,7 +236,8 @@ class Status extends Command
 
     protected function checkLeftovers(Inspector $site): void
     {
-        $keys = $site->findInViews('/\b(showRawData|showDesignGrids|minimiseDevPanel)\b/');
+        $pattern = '/\b(showRawData|showDesignGrids|minimiseDevPanel)\b/';
+        $keys = array_merge($site->findInViews($pattern), $site->findInScripts($pattern));
 
         if ($keys) {
             $this->add('warn', 'Old Alpine keys', 'found in '.count($keys).' '.(count($keys) === 1 ? 'place' : 'places'), array_merge(

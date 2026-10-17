@@ -193,13 +193,45 @@ class Inspector
     }
 
     /**
+     * The site's own scripts under resources/js (not node_modules).
+     */
+    public function scriptFiles(): array
+    {
+        $dir = $this->base.'/resources/js';
+
+        if (! is_dir($dir)) {
+            return [];
+        }
+
+        return collect(File::allFiles($dir))
+            ->map(fn ($file) => $file->getPathname())
+            ->filter(fn ($path) => preg_match('/\.(js|mjs|cjs|ts|jsx|tsx|vue)$/', $path))
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Lines in the site's views matching a pattern, as "path:line".
      */
     public function findInViews(string $pattern): array
     {
+        return $this->findIn($this->viewFiles(), $pattern);
+    }
+
+    /**
+     * Lines in the site's scripts matching a pattern, as "path:line".
+     */
+    public function findInScripts(string $pattern): array
+    {
+        return $this->findIn($this->scriptFiles(), $pattern);
+    }
+
+    protected function findIn(array $files, string $pattern): array
+    {
         $found = [];
 
-        foreach ($this->viewFiles() as $path) {
+        foreach ($files as $path) {
             foreach (file($path) as $i => $text) {
                 if (preg_match($pattern, $text)) {
                     $found[] = $this->relative($path).':'.($i + 1);
