@@ -61,6 +61,8 @@ php please dev-panel:status
 
 A read-only health check, also run at the end of `dev-panel:install`. It checks the config, Alpine.js and Tailwind in `package.json`, the Tailwind source line, whether the built CSS includes the panel, the tags in your templates, the commit config and any extra partials. It also lists leftovers from a copied dev panel: old partials and their includes, and old Alpine keys such as `showRawData`. It exits with 1 if anything needs fixing, so it can run in CI.
 
+It also shows the installed version and checks GitHub for a newer release, or for newer commits on `main` if the site requires a branch. An update within your `composer.json` constraint is shown with the `composer update` command to run. A new major version is shown with its release notes link, as it needs a constraint change. Updates are reported as something to look at, never as a failure. Use `--offline` to skip the check.
+
 The sections below describe each step, for doing them by hand.
 
 ### Tailwind

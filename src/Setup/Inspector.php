@@ -50,6 +50,22 @@ class Inspector
         return $data['dependencies'][$package] ?? $data['devDependencies'][$package] ?? null;
     }
 
+    /**
+     * The site's composer.json constraint for a package, if it requires it.
+     */
+    public function composerConstraint(string $package): ?string
+    {
+        $json = $this->base.'/composer.json';
+
+        if (! file_exists($json)) {
+            return null;
+        }
+
+        $data = json_decode(file_get_contents($json), true) ?: [];
+
+        return $data['require'][$package] ?? $data['require-dev'][$package] ?? null;
+    }
+
     public function npmMajor(string $package): ?int
     {
         $version = $this->npmVersion($package);

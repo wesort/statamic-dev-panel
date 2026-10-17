@@ -2,26 +2,31 @@
 
 namespace WeSort\DevPanel\Commands;
 
+use Composer\Semver\Semver;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\View;
 use Statamic\Console\RunsInPlease;
+use Throwable;
 use WeSort\DevPanel\Setup\Inspector;
+use WeSort\DevPanel\Setup\Releases;
 
 class Status extends Command
 {
     use RunsInPlease;
 
-    protected $signature = 'statamic:dev-panel:status';
+    protected $signature = 'statamic:dev-panel:status
+        {--offline : Skip checking GitHub for a newer release}';
 
     protected $description = 'Check how the Dev Panel addon is set up on this site.';
 
     protected array $results = [];
 
-    public function handle(Inspector $site): int
+    public function handle(Inspector $site, Releases $releases): int
     {
         $config = config('statamic-dev-panel');
         $features = $config['features'] ?? [];
 
+        $this->checkVersion($site, $releases);
         $this->checkConfig($config);
         $this->checkFrontEnd($site);
         $this->checkTemplates($site, $features);
@@ -62,6 +67,85 @@ class Status extends Command
     protected function add(string $state, string $label, string $detail, array $hints = []): void
     {
         $this->results[] = [$state, $label, $detail, $hints];
+    }
+
+    protected function checkVersion(Inspector $site, Releases $releases): void
+    {
+        ['version' => $version, 'reference' => $reference] = $releases->installed();
+        $short = $reference ? substr($reference, 0, 7) : null;
+        $isBranch = $version && str_starts_with($version, 'dev-');
+
+        if (! $version) {
+            $this->add('info', 'Version', 'unknown: the addon isn\'t in Composer\'s installed packages');
+
+            return;
+        }
+
+        $label = $isBranch && $short ? "{$version} ({$short})" : $version;
+
+        if ($this->option('offline')) {
+            $this->add('info', 'Version', $label.', not checked for updates (--offline)');
+
+            return;
+        }
+
+        try {
+            $latest = $releases->latestTag();
+            $main = $isBranch ? $releases->mainReference() : null;
+        } catch (Throwable $e) {
+            $this->add('info', 'Version', $label.', couldn\'t check for updates: '.$e->getMessage());
+
+            return;
+        }
+
+        if ($isBranch) {
+            $hints = [];
+
+            if ($main && $reference && $main !== $reference) {
+                $hints[] = 'main has newer commits: composer update '.Releases::PACKAGE;
+            }
+
+            if ($latest) {
+                $hints[] = $latest.' is released: require "'.Releases::PACKAGE.'": "^'.$this->major($latest).'.0" instead of a branch';
+            }
+
+            $hints
+                ? $this->add('warn', 'Version', $label, $hints)
+                : $this->add('ok', 'Version', $label.', up to date with main');
+
+            return;
+        }
+
+        if (! $latest || version_compare(ltrim($latest, 'v'), ltrim($version, 'v'), '<=')) {
+            $this->add('ok', 'Version', $version.', the latest release');
+
+            return;
+        }
+
+        $constraint = $site->composerConstraint(Releases::PACKAGE);
+        $allowed = $constraint && $this->satisfies(ltrim($latest, 'v'), $constraint);
+
+        $this->add('warn', 'Version', "{$version}, {$latest} is available", $allowed
+            ? ['Update: composer update '.Releases::PACKAGE, 'Release notes: '.$releases->releaseUrl($latest)]
+            : [
+                "{$latest} is outside composer.json's \"{$constraint}\": read the release notes first",
+                'Release notes: '.$releases->releaseUrl($latest),
+                'Then: composer require '.Releases::PACKAGE.':^'.$this->major($latest).'.0',
+            ]);
+    }
+
+    protected function major(string $tag): int
+    {
+        return (int) explode('.', ltrim($tag, 'v'))[0];
+    }
+
+    protected function satisfies(string $version, string $constraint): bool
+    {
+        try {
+            return Semver::satisfies($version, $constraint);
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 
     protected function checkConfig(array $config): void
