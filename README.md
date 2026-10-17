@@ -35,11 +35,33 @@ Add the repository to your `composer.json`:
 ]
 ```
 
-Then install via Composer:
+Then install via Composer and run the install command:
 
 ```bash
 composer require wesort/statamic-dev-panel
+php please dev-panel:install
+npm run build
 ```
+
+`dev-panel:install` does the safe steps for you and checks the rest:
+
+- publishes the config to `config/statamic-dev-panel.php`
+- on Tailwind 4, adds the `@source` line below to your main CSS file, after asking
+- on Tailwind 3, shows the `content` path to add
+- shows what to add to your layout. Templates are never edited for you.
+- finishes with `dev-panel:status`
+
+It is safe to run again.
+
+### Checking the setup
+
+```bash
+php please dev-panel:status
+```
+
+A read-only health check, also run at the end of `dev-panel:install`. It checks the config, Alpine.js and Tailwind in `package.json`, the Tailwind source line, whether the built CSS includes the panel, the tags in your templates, the commit config and any extra partials. It also lists leftovers from a copied dev panel: old partials and their includes, and old Alpine keys such as `showRawData`. It exits with 1 if anything needs fixing, so it can run in CI.
+
+The sections below describe each step, for doing them by hand.
 
 ### Tailwind
 
